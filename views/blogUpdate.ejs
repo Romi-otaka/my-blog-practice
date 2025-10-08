@@ -12,7 +12,7 @@
         <div>
             <h1>記事を書く</h1>
             <div>
-                <form action="/blog/update/<%= singleBlog.title %>" method="POST">
+                <form action="/blog/update/<%= singleBlog._id %>" method="POST">
                     <label for="title">タイトル</label>
                     <input type="text" name="title" value="<%= singleBlog.title%>">
                     <label for="summary">要約</label>
@@ -21,7 +21,7 @@
                     <input type="text" name="image" placeholder="/image.jpg" value="<%= singleBlog.image%>">
                     <label for="textBody">本文</label>
                     <textarea name="textBody" rows="15" >
-                        <%= singleBlog.textBody>
+                        <%= singleBlog.textBody%>
                     </textarea>
                     <br/>
                     <button type="submit">変更を反映する</button>

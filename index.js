@@ -16,25 +16,17 @@ app.use(session({
     cookie: { maxAge:3600000 },
 }))
 
-//Connecteing to MongoDB
-
+//Connecting to MongoDB
 mongoose.connect("mongodb+srv://x23028xx_db_user:pfOkGSF0wMoCxpbi@cluster0.qushghn.mongodb.net/blogUserDatabase?retryWrites=true&w=majority&appName=Cluster0")
-
-
-
-//mongodb+srv://x23028xx_db_user:<db_password>@cluster0.qushghn.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0
-
 .then(()=>{
     console.log("Success:Connected to MongoDB")
 })
 .catch((error)=>{
     console.error("Failture:Unconnected to MongoDB");
-     console.error(error); // ← これを追加
-    
+    console.error(error); // ← これを追加
 })
 
 //Defining Schema and Model
-
 const Schema = mongoose.Schema
 const BlogSchema= new Schema({
     title: String,
@@ -86,12 +78,9 @@ app.post("/blog/create",(req,res)=>{
         // console.log("error")
         // console.log("データの書き込みが失敗しました")
         // res.send("ブログデータの投稿が失敗しました")
-
     })
-
-
-//    res.send("ブログデータを投稿しました")
 })
+
 //Read All blogs
 app.get("/",async(req,res)=>{
     //const test="テストデータ"
@@ -102,24 +91,18 @@ app.get("/",async(req,res)=>{
     //res.send("全ブログデータを読み取りました")//ブラウザにメッセージを送信
     res.render("index",{allBlogs: allBlogs,session: req.session.userId})
 })
-//Read Single blog
-app.get("/blog/:id",async(req,res)=>{
-    //console.log(req.params.id)
-    const singleBlog = await BlogModel.findById(req.params.id)
-    //console.log("singleBlogの中身：",singleBlog)
-    //res.send("個別の記事ページ")
-     res.render("blogRead",{singleBlog: singleBlog,session: req.session.userId})
-})
+
 //Update blog
 app.get("/blog/update/:id",async(req,res)=>{
     //console.log(req.params.id)
-    const singleBlog = await BlogModel.findById(req.params.id)
-   //console.log("singleBlogの中身：",singleBlog)
+    const id = req.params.id
+    if(!mongoose.Types.ObjectId.isValid(id)) return res.status(404).send("ブログが存在しません")
+    const singleBlog = await BlogModel.findById(id)
+    if(!singleBlog) return res.status(404).send("ブログが存在しません")
+    //console.log("singleBlogの中身：",singleBlog)
     //res.send("個別の記事編集ページ")
     res.render("blogUpdate",{singleBlog})
-   
 })
-
 app.post("/blog/update/:id",(req,res)=>{
     BlogModel.updateOne({_id: req.params.id},req.body)
     .then(()=>{
@@ -131,19 +114,20 @@ app.post("/blog/update/:id",(req,res)=>{
         res.render("error",{message: "/blog/updateのエラー"})
         // console.log("データの編集が失敗しました")
         // res.send("ブログデータの編集が失敗しました")
-
     })
 })
+
 //Delate blog
 app.get("/blog/delete/:id",async(req,res)=>{
     //console.log(req.params.id)
-    const singleBlog = await BlogModel.findById(req.params.id)
+    const id = req.params.id
+    if(!mongoose.Types.ObjectId.isValid(id)) return res.status(404).send("ブログが存在しません")
+    const singleBlog = await BlogModel.findById(id)
+    if(!singleBlog) return res.status(404).send("ブログが存在しません")
     //console.log("singleBlogの中身：",singleBlog)
-   // res.send("個別の記事削除ページ")
+    // res.send("個別の記事削除ページ")
     res.render("blogdelete",{singleBlog})
 })
-
-
 app.post("/blog/delete/:id",(req,res)=>{
     BlogModel.deleteOne({_id: req.params.id},req.body)
     .then(()=>{
@@ -155,9 +139,21 @@ app.post("/blog/delete/:id",(req,res)=>{
          res.render("error",{message: "/blog/deleteのエラー"})
         // console.log("データの削除が失敗しました")
         // res.send("ブログデータの削除が失敗しました")
-
     })
 })
+
+//Read Single blog (必ず固定パスの後に)
+app.get("/blog/:id",async(req,res)=>{
+    //console.log(req.params.id)
+    const id = req.params.id
+    if(!mongoose.Types.ObjectId.isValid(id)) return res.status(404).send("ブログが存在しません")
+    const singleBlog = await BlogModel.findById(id)
+    if(!singleBlog) return res.status(404).send("ブログが存在しません")
+    //console.log("singleBlogの中身：",singleBlog)
+    //res.send("個別の記事ページ")
+    res.render("blogRead",{singleBlog: singleBlog,session: req.session.userId})
+})
+
 //ユーザー関係機能
 //Create user
 app.get("/user/create",(req,res)=>{
@@ -188,11 +184,9 @@ app.post("/user/login",(req,res)=>{
                 req.session.userId = savedDate._id.toString()
                 //res.send("ログイン成功です")
                 res.redirect("/")
-
             }else{
                 //res.send("パスワードが間違っています")
                 res.render("error",{message: "/blog/loginのエラー:パスワードが間違っています"})
-
             }
             //res.send("ユーザーは存在しています")
         }
@@ -208,7 +202,6 @@ app.post("/user/login",(req,res)=>{
         res.render("error",{message: "/blog/loginのエラー:エラーが発生しました"})
     })
 })
-
 
 //Connecting to port
 app.listen(3000,()=>{

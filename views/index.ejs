@@ -11,8 +11,8 @@
             <% allBlogs.forEach((blog)=>{%>
                 <div class="card">
                     <a href="blog/<%= blog._id%>">
-                        <image src="/public/images/<%=blog.image %>" alt="blog-image"/>
-                        <div class="textarea">
+                        <image src="/public/images<%=blog.image %>" alt="blog-image"/>
+                        <div class="text-area">
                             <h2><%= blog.title %></h2>
                             <p><%= blog.summary %></p>
                         </div>
@@ -27,10 +27,10 @@
             <% } %>
 
             <% if(session === undefined){ %>
-                <a href="/blog/login" class="login-button">ログイン</a>
+                <a href="/user/login" class="login-button">ログイン</a>
             <% } %>
             <% if(session === undefined){ %>
-                <a href="/blog/create" class="user-create-button">投稿する</a>
+                <a href="/user/create" class="user-create-button">投稿する</a>
             <% } %>
             
 

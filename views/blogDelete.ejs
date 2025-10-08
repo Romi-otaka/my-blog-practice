@@ -10,9 +10,9 @@
 
     <main>
         <div class="blog-delete">
-            <form action="/blog/delete/<%= singleBlog.title %>" method="POST">
+            <form action="/blog/delete/<%= singleBlog._id %>" method="POST">
                 <h1><%= singleBlog.title%></h1>
-                <image src="/public/images/<%=singleBlog.image %>" alt="blog-image"/>
+                <image src="/public/images<%=singleBlog.image %>" alt="blog-image"/>
                 <p><%= singleBlog.textBody%></p>
                 <button type="submit">削除する</button>
             </form>

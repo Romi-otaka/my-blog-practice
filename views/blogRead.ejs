@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-    <title><%= singleBlog.title ></title>
+    <title><%= singleBlog.title %></title>
     <%- include("./head");%>
 </head>
 <body>
@@ -9,7 +9,7 @@
     <main>
         <div class="blog-read">
             <h1><%= singleBlog.title %></h1>
-            <image src="/public/images/<%=singleBlog.image %>" alt="blog-image"/>
+            <image src="/public/images<%=singleBlog.image %>" alt="blog-image"/>
             <p><%= singleBlog.textBody %></p>
         </div>
 
