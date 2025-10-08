@@ -23,187 +23,133 @@ mongoose.connect("mongodb+srv://x23028xx_db_user:pfOkGSF0wMoCxpbi@cluster0.qushg
 })
 .catch((error)=>{
     console.error("Failture:Unconnected to MongoDB");
-    console.error(error); // ← これを追加
+    console.error(error); 
 })
 
 //Defining Schema and Model
 const Schema = mongoose.Schema
-const BlogSchema= new Schema({
-    title: String,
-    summary:String,
-    image:String,
-    textBody:String,
+
+// ChatSchemaをアカウント参照に変更
+const ChatSchema = new Schema({
+    userId: { type: Schema.Types.ObjectId, ref: "Account", required: true },
+    message: { type: String, required: true },
+    createdAt: { type: Date, default: Date.now }
 })
 
-const UserSchema = new Schema({
+const AccountSchema = new Schema({
     name: {
         type: String,
-        required: true
-    },
-    email: {
-        type: String,
         required: true,
-        unique: true
+        unique: true,
     },
     password: {
         type: String,
-        required: true
+        required: true,
+    },
+    image: {
+        type: String,
+        required: true,
     }
 })
 
-const BlogModel=mongoose.model("Blog",BlogSchema)
-const UserModel=mongoose.model("User",UserSchema)
+const ChatModel = mongoose.model("Chat", ChatSchema)
+const AccountModel = mongoose.model("Account", AccountSchema)
 
-//ブログ機能関連　
-
-//Create a blog
-app.get("/blog/create",(req,res)=>{
+//チャット機能関連
+//Create a chat
+app.get("/chat/create",(req,res)=>{
     if(req.session.userId){
-        res.render("blogCreate")
-    }
-    else{
-        res.redirect("/user/login")
+        res.render("chatCreate")
+    } else {
+        res.redirect("/account/login")
     }
 })
-app.post("/blog/create",(req,res)=>{
-    //console.log("reqの中身",req.body)
-    BlogModel.create(req.body)
+app.post("/chat/create",(req,res)=>{
+    if(!req.session.userId) return res.redirect("/account/login");
+
+    ChatModel.create({
+        userId: req.session.userId,
+        message: req.body.message
+    })
     .then(()=>{
         res.redirect("/")
-        //console.log("データの書き込みが成功しました")
-        //res.send("ブログデータの投稿が成功しました")
     })
     .catch((error)=>{
-        res.render("error",{message:"/blog/createのエラー"})
-        // console.log("error")
-        // console.log("データの書き込みが失敗しました")
-        // res.send("ブログデータの投稿が失敗しました")
+        res.render("error",{message:"/chat/createのエラー"})
     })
 })
 
-//Read All blogs
-app.get("/",async(req,res)=>{
-    //const test="テストデータ"
-    //console.log("testの中身：",test)
-    const allBlogs = await BlogModel.find()//データベースからブログデータを取得中
-    //console.log("reqの中身：",req)
-    //console.log("allBlogの中身：",allBlogs)//取得、格納が完了
-    //res.send("全ブログデータを読み取りました")//ブラウザにメッセージを送信
-    res.render("index",{allBlogs: allBlogs,session: req.session.userId})
+// Read All chats
+app.get("/", async(req,res)=>{
+    const allChats = await ChatModel.find()
+        .populate("userId") // userIdからアカウント情報を取得
+        .sort({ createdAt: 1 });
+
+    res.render("index",{allChats: allChats, session: req.session.userId})
 })
 
-//Update blog
-app.get("/blog/update/:id",async(req,res)=>{
-    //console.log(req.params.id)
+//Update chat
+app.get("/chat/update/:id", async(req,res)=>{
     const id = req.params.id
-    if(!mongoose.Types.ObjectId.isValid(id)) return res.status(404).send("ブログが存在しません")
-    const singleBlog = await BlogModel.findById(id)
-    if(!singleBlog) return res.status(404).send("ブログが存在しません")
-    //console.log("singleBlogの中身：",singleBlog)
-    //res.send("個別の記事編集ページ")
-    res.render("blogUpdate",{singleBlog})
+    if(!mongoose.Types.ObjectId.isValid(id)) return res.status(404).send("チャットが存在しません")
+    const singleChat = await ChatModel.findById(id)
+    if(!singleChat) return res.status(404).send("チャットが存在しません")
+    res.render("chatUpdate",{singleChat})
 })
-app.post("/blog/update/:id",(req,res)=>{
-    BlogModel.updateOne({_id: req.params.id},req.body)
-    .then(()=>{
-        res.redirect("/")
-        // console.log("データの編集が成功しました")
-        // res.send("ブログデータの編集が成功しました")
-    })
-    .catch(()=>{
-        res.render("error",{message: "/blog/updateのエラー"})
-        // console.log("データの編集が失敗しました")
-        // res.send("ブログデータの編集が失敗しました")
-    })
+app.post("/chat/update/:id",(req,res)=>{
+    ChatModel.updateOne({_id: req.params.id}, req.body)
+    .then(()=> res.redirect("/"))
+    .catch(()=> res.render("error",{message: "/chat/updateのエラー"}))
 })
 
-//Delate blog
-app.get("/blog/delete/:id",async(req,res)=>{
-    //console.log(req.params.id)
+//Delete chat
+app.get("/chat/delete/:id", async(req,res)=>{
     const id = req.params.id
-    if(!mongoose.Types.ObjectId.isValid(id)) return res.status(404).send("ブログが存在しません")
-    const singleBlog = await BlogModel.findById(id)
-    if(!singleBlog) return res.status(404).send("ブログが存在しません")
-    //console.log("singleBlogの中身：",singleBlog)
-    // res.send("個別の記事削除ページ")
-    res.render("blogdelete",{singleBlog})
+    if(!mongoose.Types.ObjectId.isValid(id)) return res.status(404).send("チャットが存在しません")
+    const singleChat = await ChatModel.findById(id)
+    if(!singleChat) return res.status(404).send("チャットが存在しません")
+    res.render("chatdelete",{singleChat})
 })
-app.post("/blog/delete/:id",(req,res)=>{
-    BlogModel.deleteOne({_id: req.params.id},req.body)
-    .then(()=>{
-        res.redirect("/")
-        // console.log("データの削除が成功しました")
-        // res.send("ブログデータの削除が成功しました")
-    })
-    .catch(()=>{
-         res.render("error",{message: "/blog/deleteのエラー"})
-        // console.log("データの削除が失敗しました")
-        // res.send("ブログデータの削除が失敗しました")
-    })
+app.post("/chat/delete/:id",(req,res)=>{
+    ChatModel.deleteOne({_id: req.params.id}, req.body)
+    .then(()=> res.redirect("/"))
+    .catch(()=> res.render("error",{message: "/chat/deleteのエラー"}))
 })
 
-//Read Single blog (必ず固定パスの後に)
-app.get("/blog/:id",async(req,res)=>{
-    //console.log(req.params.id)
+//Read single chat
+app.get("/chat/:id", async(req,res)=>{
     const id = req.params.id
-    if(!mongoose.Types.ObjectId.isValid(id)) return res.status(404).send("ブログが存在しません")
-    const singleBlog = await BlogModel.findById(id)
-    if(!singleBlog) return res.status(404).send("ブログが存在しません")
-    //console.log("singleBlogの中身：",singleBlog)
-    //res.send("個別の記事ページ")
-    res.render("blogRead",{singleBlog: singleBlog,session: req.session.userId})
+    if(!mongoose.Types.ObjectId.isValid(id)) return res.status(404).send("チャットが存在しません")
+    const singleChat = await ChatModel.findById(id).populate("userId")
+    if(!singleChat) return res.status(404).send("チャットが存在しません")
+    res.render("chatRead",{singleChat: singleChat, session: req.session.userId})
 })
 
-//ユーザー関係機能
-//Create user
-app.get("/user/create",(req,res)=>{
-    res.render("userCreate")
+//アカウント関係機能
+app.get("/account/create",(req,res)=>{ res.render("accountCreate") })
+app.post("/account/create",(req,res)=>{
+    AccountModel.create(req.body)
+    .then(()=> res.redirect("/account/login"))
+    .catch(()=> res.render("error",{message: "/account/createのエラー"}))
 })
-app.post("/user/create",(req,res)=>{
-    UserModel.create(req.body)
-    .then(()=>{
-        res.redirect("/user/login")
-        // console.log("ユーザーデータの書き込みが成功しました")
-        // res.send("ユーザーデータの登録が成功しました")
-    })
-    .catch(()=>{
-        res.render("error",{message: "/blog/createのエラー"})
-        // console.log("ユーザーデータの書き込みが失敗しました")
-        // res.send("ユーザーデータの登録が失敗しました")
-    })
-})
-//Login
-app.get("/user/login",(req,res)=>{
-    res.render("login")
-})
-app.post("/user/login",(req,res)=>{
-    UserModel.findOne({email: req.body.email})
-    .then((savedDate)=>{
-        if(savedDate){
-            if(req.body.password==savedDate.password){
-                req.session.userId = savedDate._id.toString()
-                //res.send("ログイン成功です")
+
+app.get("/account/login",(req,res)=>{ res.render("login") })
+app.post("/account/login",(req,res)=>{
+    AccountModel.findOne({name: req.body.name})
+    .then((savedData)=>{
+        if(savedData){
+            if(req.body.password === savedData.password){
+                req.session.userId = savedData._id.toString()
                 res.redirect("/")
-            }else{
-                //res.send("パスワードが間違っています")
-                res.render("error",{message: "/blog/loginのエラー:パスワードが間違っています"})
+            } else {
+                res.render("error",{message: "/account/loginのエラー:パスワードが間違っています"})
             }
-            //res.send("ユーザーは存在しています")
+        } else {
+            res.render("error",{message: "/account/loginのエラー:ユーザーが存在していません"})
         }
-        else{
-            res.render("error",{message: "/blog/loginのエラー:パユーザーが存在していません"})
-            //res.send("ユーザーは存在していません")
-        }
-       // console.log(savedDate)
-        //res.send("ユーザーは存在しています")
     })
-    .catch(()=>{
-        //res.send("エラーが発生しました")
-        res.render("error",{message: "/blog/loginのエラー:エラーが発生しました"})
-    })
+    .catch(()=> res.render("error",{message: "/account/loginのエラー:エラーが発生しました"}))
 })
 
 //Connecting to port
-app.listen(3000,()=>{
-    console.log("Listening on localhost port 3000")
-})
+app.listen(3000,()=>{ console.log("Listening on localhost port 3000") })

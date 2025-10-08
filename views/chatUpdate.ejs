@@ -1,0 +1,27 @@
+
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <title>編集ページ</title>
+    <%- include("./head");%>
+</head>
+<body>
+    <%- include("./header");%>
+
+    <main>
+        <div>
+            <h1>チャットを書く</h1>
+            <div>
+                <form action="/chat/update/<%= singleChat._id %>" method="POST">
+                    <label for="message">メッセージ</label>
+                    <input type="text" name="message" value="<%= singleChat.message>">
+                    <br/>
+                    <button type="submit">変更を反映する</button>
+                </form>
+            </div>
+        </div>
+    </main>
+    <%- include("./footer");%>
+</body>
+
+</html>

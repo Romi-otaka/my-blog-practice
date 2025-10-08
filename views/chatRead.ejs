@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <title><%= singleChat.title %></title>
+    <%- include("./head"); %>
+    <style>
+        .chat-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .chat-header img {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+    </style>
+</head>
+<body>
+    <%- include("./header"); %>
+    <main>
+        <div class="blog-read">
+            <% if(singleChat.userId){ %>
+                <div class="chat-header">
+                    <img src="<%= singleChat.userId.image %>" alt="<%= singleChat.userId.name %>">
+                    <strong><%= singleChat.userId.name %></strong>
+                </div>
+            <% } %>
+            <h1><%= singleChat.message %></h1>
+        </div>
+        <div class="bottom">
+            <% if(session !== undefined){ %>
+                <a href="/chat/update/<%= singleChat._id %>" class="update-button">編集</a>
+            <% } %>
+            <% if(session !== undefined){ %>
+                <a href="/chat/delete/<%= singleChat._id %>" class="delete-button">削除</a>
+            <% } %>
+        </div>
+    </main>
+    <%- include("./footer"); %>
+</body>
+</html>

@@ -2,42 +2,53 @@
 <html lang="ja">
 <head>
     <title>Node Advanced Blog</title>
-    <%- include("./head");%>
+    <%- include("./head"); %>
+    <style>
+        .chat-card {
+            display: flex;
+            align-items: center;
+        }
+        .chat-card img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+        .chat-message {
+            display: inline-block;
+        }
+    </style>
 </head>
 <body>
-    <%- include("./header");%>
+    <%- include("./header"); %>
     <main>
         <div class="grid-container">
-            <% allBlogs.forEach((blog)=>{%>
+            <% allChats.forEach((chat) => { %>
                 <div class="card">
-                    <a href="blog/<%= blog._id%>">
-                        <image src="/public/images<%=blog.image %>" alt="blog-image"/>
-                        <div class="text-area">
-                            <h2><%= blog.title %></h2>
-                            <p><%= blog.summary %></p>
+                    <a href="chat/<%= chat._id %>">
+                        <div class="text-area chat-card">
+                            <% if(chat.userId){ %>
+                                <img src="/public/images/<%= chat.userId.image %>" alt="<%= chat.userId.name %>">
+                                <strong><%= chat.userId.name %>:</strong>
+                            <% } %>
+                            <div class="chat-message"><%= chat.message %></div>
                         </div>
-                        </a>
+                    </a>
                 </div>
-                <% }) %>
+            <% }) %>
         </div>
 
         <div class="bottom">
             <% if(session !== undefined){ %>
-                <a href="/blog/create" class="create-button">記事を書く</a>
-            <% } %>
-
-            <% if(session === undefined){ %>
-                <a href="/user/login" class="login-button">ログイン</a>
+                <a href="/chat/create" class="create-button">チャットを書く</a>
             <% } %>
             <% if(session === undefined){ %>
-                <a href="/user/create" class="user-create-button">投稿する</a>
+                <a href="/account/login" class="login-button">ログイン</a>
+                <a href="/account/create" class="user-create-button">アカウント作成</a>
             <% } %>
-            
-
         </div>
        
     </main>
-    <%- include("./footer");%>
-    
+    <%- include("./footer"); %>
 </body>
 </html>
